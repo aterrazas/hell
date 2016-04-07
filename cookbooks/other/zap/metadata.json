@@ -1,0 +1,42 @@
+{
+  "name": "zap",
+  "description": "Provides HWRPs for creating authoritative resources",
+  "long_description": "zap\n===\n\nLibrary cookbook for garbage collecting chef controlled resource sets.\n\nOne of the common pitfalls in chef land is the pattern of one deleting a\nresource definition from a recipe and the user wondering why the resource still\nexists on the system.\n\nFor example, on Monday a cronjob is added:\n\n```ruby\ncron 'collect stats' do\n  action\t:create\n  minute\t0\n  command '/usr/local/bin/collect-stats | mailto ops@nvwls.com'\nend\n```\n\nAfter a few days, the issue is figured out and that cron resource is removed\nfrom the recipe.  After uploading the new cookbook, they wonder why they are\nstill receiving email.\n\nThe issue that chef is great for describing actions.  I mean, *action* is part\nof the DSL.\n\nAt the 2013 Opscode Communit Summit, Matt Ray and I had a discussion regarding\nthis issue.  The name *authoritative cookbook* was coined.  If chef is deploying\nfiles to a .d directory, if there are files in that directory not converged by a\nresource, those files should be removed.\n\nThis pattern has been added to https://github.com/Youscribe/sysctl-cookbook\n\nI presented the zap pattern at ChefConf 2014. You can check out the\nvideo\nhttp://www.youtube.com/watch?v=4-So4AJlBI4&list=PL11cZfNdwNyMmx0msapJfuGsLV43C7XsA&feature=share&index=53\nand the slides\nhttps://speakerdeck.com/nvwls/building-authoritative-resource-sets\n\nThanks\n======\n\nUsers and groups support was provided by Sander Botman <sbotman@schubergphilis.com>.\nYum_repository support was provided by Sander van Harmelen <svanharmelen@schubergphilis.com>\nApt_repository support was provided by Helgi Þormar Þorbjörnsson <helgi@php.net>\nfirewall support was provided by Ronald Doorn <rdoorn@schubergphilis.com>.\n\nResource/Provider\n=================\n\nzap_directory\n-------------\n\n## Actions\n\n- **:delete** - Delete files and symlinks in a directory\n\n## Attribute Parameters\n\n- **pattern** - Pattern of files to match, i.e. `*.conf`, defaults to `*`\n- **recursive** - Recurse into subdirectories, defaults to `false`\n\n### Examples\n\n```ruby\nzap_directory '/etc/sysctl.d' do\n  pattern '*.conf'\nend\n```\n\nzap_crontab\n-----------\n\n## Actions\n\n- **:delete** - Delete jobs from a user's crontab\n\n## Attribute Parameters\n\n- **pattern** - Pattern of job names match, i.e. `test \\#*`, defaults to `*`\n\n### Examples\n\n```ruby\nzap_crontab 'root' do\n  pattern 'test \\#*'\nend\n```\n\nzap_users\n---------\n\nDelete users from `/etc/passwd` style files.\n`node['zap']['users']['keep']` contains an array of user names to\nkeep, i.e. `root`.\n\n## Actions\n\n- **:remove**\n\n## Example\n\n```ruby\nzap_users '/etc/passwd' do\n  # only zap users whose uid is greater than 500\n  filter { |u| u.uid > 500 }\nend\n```\n\nzap_groups\n----------\n\nDelete groups from `/etc/group` style files.\n`node['zap']['groups']['keep']` contains an array of group names to\nkeep, i.e. `wheel`.\n\n## Actions\n\n- **:remove**\n\n## Example\n\n```ruby\nzap_groups '/etc/group' do\n  filter { |g| g.gid > 500 && g.name != 'nrpe' }\nend\n```\n\nzap_yum_repos\n-------------\n\nIf you manage your yum repos using the yum_repository LWRP from the yum cookbook,\nyou can use this provider to dynamically delete any unmanaged or obsolete repos.\n\n## Actions\n\n- **:delete** - Delete yum repos using the yum_repository LWRP from the yum cookbook\n\n## Attribute Parameters\n\n- **pattern** - Pattern of repository names to match, i.e. `epel` or `update`, defaults to `*`\n- **immediately** - Set to `true` if you want this action to be executed immediately, defaults to `true`\n\n## Example\n\n```ruby\nzap_yum_repos '/etc/yum.repos.d' do\n  pattern 'epel'\n  immediately false\nend\n```\n\nzap_apt_repos\n-------------\n\nIf you manage your apt repos using the apt_repository LWRP from the apt cookbook,\nyou can use this provider to dynamically delete any unmanaged or obsolete repos.\n\n## Actions\n\n- **:remove** - Delete apt repos using the apt_repository LWRP from the apt cookbook\n\n## Attribute Parameters\n\n- **pattern** - Pattern of repository names to match, i.e. `ppa` or `update`, defaults to `*`\n- **immediately** - Set to `true` if you want this action to be executed immediately, defaults to `true`\n\n## Example\n\n```ruby\nzap_apt_repos '/etc/apt/sources.list.d' do\n  pattern 'ppa'\n  immediately false\n  action :remove\nend\n```\n\nzap_firewall\n---------\n\nDelete all firewall rules that were not defined in Chef using the firewall cookbook.\n\n## Actions\n\n- **:remove**\n\n## Example\n\n```ruby\nzap_firewall \"cleaning up firewall\"\n```\n\nzap\n---\n\nThis the base HWRP.\n\n## Example\n\n```ruby\nzap '/etc/sysctl.d' do\n  klass [Chef::Resource::File, 'Chef::Resource::Template']\n  collect { ::Dir.glob(\"#{base}/*\") }\nend\n```\n\nRecipes\n=======\n\nzap::cron_d\n-----------\n\nRemove `/etc/cron.d` entries.\n",
+  "maintainer": "Joseph J. Nuspl Jr.",
+  "maintainer_email": "nuspl@nvwls.com",
+  "license": "Apache 2.0",
+  "platforms": {
+
+  },
+  "dependencies": {
+
+  },
+  "recommendations": {
+
+  },
+  "suggestions": {
+
+  },
+  "conflicting": {
+
+  },
+  "providing": {
+
+  },
+  "replacing": {
+
+  },
+  "attributes": {
+
+  },
+  "groupings": {
+
+  },
+  "recipes": {
+
+  },
+  "version": "0.11.2",
+  "source_url": "",
+  "issues_url": "",
+  "privacy": false
+}

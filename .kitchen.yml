@@ -1,0 +1,22 @@
+---
+driver:
+  name: vagrant
+  network:
+    - ["private_network", { type: "dhcp" }]
+    
+provisioner:
+  name: chef_zero
+
+
+platforms:
+  - name: ubuntu-14.04
+  - name: centos-6.7
+  
+
+suites:
+  - name: webserver
+    run_list:
+      #- recipe[nginx::default]
+      - recipe[java::default]
+      #- recipe[apache::default]
+    attributes:
